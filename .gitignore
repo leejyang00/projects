@@ -1,0 +1,24 @@
+# Terraform
+.terraform/
+!.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# AWS
+.aws/
+*.pem
+*.key
+credentials
+
+# Secrets / env
+*.env
+.env
+.env.*
+secrets.tfvars
+*.auto.tfvars
