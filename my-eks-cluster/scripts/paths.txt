@@ -1,0 +1,5 @@
+
+destroy
+my-eks-cluster/infrastructure
+
+

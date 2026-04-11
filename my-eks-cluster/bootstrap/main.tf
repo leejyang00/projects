@@ -4,7 +4,7 @@ data "aws_region" "current" {}
 
 # s3 bucket for storing Terraform remote state
 resource "aws_s3_bucket" "my_eks_terraform_state" {
-  bucket = format("my-eks-tfstate-%s-%s", data.aws_caller_identity.current.account_id, data.aws_region.current.name)
+  bucket = format("my-eks-tfstate-%s-%s", data.aws_caller_identity.current.account_id, data.aws_region.current.region)
 
   tags = {
     Name        = "my-eks-tfstate-bucket"
