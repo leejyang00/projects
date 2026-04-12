@@ -16,8 +16,8 @@ echo "  my-eks-cluster/infrastructure"
 echo "  my-eks-cluster/another-folder"
 echo ""
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)" # grabbing /scripts directory path
+BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)" # grabbing /my-eks-cluster directory path
 PATHS_FILE="$SCRIPT_DIR/paths.txt"
 
 SPECIFIC="$1"
@@ -71,7 +71,7 @@ destroy_all_paths() {
             continue
         fi
 
-        terraform -chdir="$FOLDER_PATH" destroy
+        terraform -chdir="$FOLDER_PATH" destroy -auto-approve
         if [[ $? -ne 0 ]]; then
             echo "Error: Terraform destroy failed for '$path'."
             exit 1

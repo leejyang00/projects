@@ -7,8 +7,8 @@ data "aws_caller_identity" "current" {}
 
 locals {
   azs = slice(data.aws_availability_zones.available.names, 0, 2)
-  project_name = "project-eks"
-  cluster_name = "my-eks-cluster"
+  project_name = "eks-playground"
+  cluster_name = "eks-playground-cluster"
 }
 
 # main vpc
