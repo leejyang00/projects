@@ -17,6 +17,10 @@ resource "aws_eks_cluster" "eks_playground" {
         # public_access_cidrs = ["101.115.166.109/32"] # Replace with your IP or CIDR block for secure access
     }
 
+    access_config {
+        authentication_mode = "API_AND_CONFIG_MAP"
+    }
+
     depends_on = [
         aws_iam_role_policy_attachment.eks_cluster_role_attachment
     ]
@@ -26,12 +30,12 @@ resource "aws_eks_cluster" "eks_playground" {
 resource "aws_eks_access_entry" "admin_access" {
     cluster_name = aws_eks_cluster.eks_playground.name
     principal_arn = data.aws_caller_identity.current.arn
-    type = "Standard"
+    type = "STANDARD"
 }
 
 resource "aws_eks_access_policy_association" "admin_access_policy" {
     cluster_name = aws_eks_cluster.eks_playground.name
-    policy_arn    = "arn:${data.aws_partition.current.partition}:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+    policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
     principal_arn = data.aws_caller_identity.current.arn
 
     access_scope {

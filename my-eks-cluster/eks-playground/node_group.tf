@@ -29,5 +29,6 @@ resource "aws_eks_node_group" "eks_playground_node_group" {
   depends_on = [
     aws_iam_role_policy_attachment.eks_node_role_attachment,
     aws_iam_role_policy_attachment.eks_node_cni_attachment,
+    aws_iam_role_policy_attachment.eks_node_ecr_attachment,
   ]
 }

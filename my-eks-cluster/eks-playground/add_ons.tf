@@ -22,7 +22,9 @@ resource "aws_eks_addon" "coredns" {
   addon_name   = "coredns"
   addon_version = "v1.11.4-eksbuild.33" # matching cluster version 1.30"
 
-#   depends_on = [aws_eks_cluster.eks_playground] # depends on node group
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [aws_eks_node_group.eks_playground_node_group] # depends on node group
 
 }
 
@@ -31,6 +33,8 @@ resource "aws_eks_addon" "kube_proxy" {
   addon_name   = "kube-proxy"
   addon_version = "v1.30.14-eksbuild.28" # matching cluster version 1.30
 
+  resolve_conflicts_on_update = "OVERWRITE"
+
   depends_on = [aws_eks_cluster.eks_playground]
 }
 
@@ -38,6 +42,8 @@ resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.eks_playground.name
   addon_name   = "vpc-cni"
   addon_version = "v1.21.1-eksbuild.1" # matching cluster version 1.30
+
+  resolve_conflicts_on_update = "OVERWRITE"
 
   depends_on = [aws_eks_cluster.eks_playground]
 }
