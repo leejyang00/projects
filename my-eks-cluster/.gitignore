@@ -14,6 +14,8 @@ override.tf.json
 
 *tfplan
 
+# macOS
+.DS_Store
 
 # AWS
 .aws/
