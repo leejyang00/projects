@@ -9,12 +9,23 @@ echo "Running Terraform plan and apply..."
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-TF_FOLDER="$1"
+
+AUTO_APPROVE=false
+TF_FOLDER=""
+
+for arg in "$@"; do
+    if [[ "$arg" == "--apply-all" ]]; then
+        AUTO_APPROVE=true
+    else
+        TF_FOLDER="$arg"
+    fi
+done
 
 if [[ -z "$TF_FOLDER" ]]; then
     echo " "
     echo "Error: No Terraform folder specified."
     echo "  - run script \"sh ./scripts/tf-plan-apply.sh <terraform-folder>\""
+    echo "  - run script \"sh ./scripts/tf-plan-apply.sh --apply-all <terraform-folder>\""
     exit 1
 fi
 
@@ -96,8 +107,12 @@ run_tf_plan() {
     fi
     (cd "$FOLDER_PATH" && tf-summarize tfplan)
 
-    read -p "Apply these changes? (Y/n) " apply_changes
-    apply_changes="${apply_changes:-y}"
+    if [[ "$AUTO_APPROVE" == true ]]; then
+        apply_changes="y"
+    else
+        read -p "Apply these changes? (Y/n) " apply_changes
+        apply_changes="${apply_changes:-y}"
+    fi
     echo ""
 }
 

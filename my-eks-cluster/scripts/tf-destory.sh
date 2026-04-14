@@ -7,8 +7,10 @@ echo "  Runs 'terraform destroy' on one or all paths listed under the 'destroy'"
 echo "  heading in scripts/paths.txt. Paths must be relative to my-eks-cluster."
 echo ""
 echo "Usage:"
-echo "  sh ./scripts/tf-destroy.sh                        # destroy all paths in paths.txt"
-echo "  sh ./scripts/tf-destroy.sh my-eks-cluster/infra   # destroy a specific path"
+echo "  sh ./scripts/tf-destroy.sh                              # destroy all paths in paths.txt"
+echo "  sh ./scripts/tf-destroy.sh my-eks-cluster/infra         # destroy a specific path"
+echo "  sh ./scripts/tf-destroy.sh --destroy-all                # destroy all paths, skip y/N prompts"
+echo "  sh ./scripts/tf-destroy.sh --destroy-all my-eks-cluster/infra  # destroy specific path, skip y/N"
 echo ""
 echo "paths.txt format:"
 echo "  destroy"
@@ -20,7 +22,16 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)" # grabbing /scripts directory path
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)" # grabbing /my-eks-cluster directory path
 PATHS_FILE="$SCRIPT_DIR/paths.txt"
 
-SPECIFIC="$1"
+AUTO_APPROVE=false
+SPECIFIC=""
+
+for arg in "$@"; do
+    if [[ "$arg" == "--destroy-all" ]]; then
+        AUTO_APPROVE=true
+    else
+        SPECIFIC="$arg"
+    fi
+done
 
 destroy_all_paths() {
     # read paths listed under the "destroy" heading in paths.txt
@@ -61,14 +72,14 @@ destroy_all_paths() {
 
         echo ""
         echo "Destroying: $FOLDER_PATH"
-        read -p "Confirm destroy for '$path'? (y/N) " confirm < /dev/tty
-        confirm="${confirm:-n}"
-        echo ""
-
-
-        if [[ "$confirm" != "y" ]]; then
-            echo "Skipping '$path'."
-            continue
+        if [[ "$AUTO_APPROVE" == false ]]; then
+            read -p "Confirm destroy for '$path'? (y/N) " confirm < /dev/tty
+            confirm="${confirm:-n}"
+            echo ""
+            if [[ "$confirm" != "y" ]]; then
+                echo "Skipping '$path'."
+                continue
+            fi
         fi
 
         terraform -chdir="$FOLDER_PATH" destroy -auto-approve
@@ -92,13 +103,14 @@ destroy_one_path() {
 
     echo ""
     echo "Destroying: $FOLDER_PATH"
-    read -p "Confirm destroy for '$SPECIFIC'? (y/N) " confirm < /dev/tty
-    confirm="${confirm:-n}"
-    echo ""
-
-    if [[ "$confirm" != "y" ]]; then
-        echo "Aborting destroy for '$SPECIFIC'."
-        exit 0
+    if [[ "$AUTO_APPROVE" == false ]]; then
+        read -p "Confirm destroy for '$SPECIFIC'? (y/N) " confirm < /dev/tty
+        confirm="${confirm:-n}"
+        echo ""
+        if [[ "$confirm" != "y" ]]; then
+            echo "Aborting destroy for '$SPECIFIC'."
+            exit 0
+        fi
     fi
 
     terraform -chdir="$FOLDER_PATH" destroy

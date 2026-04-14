@@ -1,5 +1,5 @@
 
 destroy
-my-eks-cluster/infrastructure
 my-eks-cluster/eks-playground
+my-eks-cluster/infrastructure
 
