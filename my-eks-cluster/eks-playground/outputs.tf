@@ -1,3 +1,7 @@
+output "eks_project_name" {
+  value = "eks-playground"
+}
+
 output "eks_cluster_name" {
   value = aws_eks_cluster.eks_playground.name
 }
@@ -40,6 +44,14 @@ output "eks_node_group_labels" {
 
 output "eks_node_group_tags" {
   value = aws_eks_node_group.eks_playground_node_group.tags
+}
+
+output "eks_oidc_provider_url" {
+  value = aws_iam_openid_connect_provider.cluster.url
+}
+
+output "eks_oidc_provider_arn" {
+  value = aws_iam_openid_connect_provider.cluster.arn
 }
 
 # output "eks_node_group_launch_template_id" {
