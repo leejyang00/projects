@@ -6,19 +6,21 @@ locals {
 
 # IAM policy
 resource "aws_iam_policy" "lb_controller" {
-  name        = data.terraform_remote_state.eks_playground.outputs.project_name + "-lb-controller-policy"
+  name        = "${data.terraform_remote_state.eks_playground.outputs.eks_project_name}-lb-controller-policy"
   description = "IAM policy for AWS Load Balancer Controller in EKS cluster"
 
-  policy = file("${path.module}/lb-controller-policy.json")
+  policy = templatefile("${path.module}/lb-controller-policy.json.tftpl", {
+    cluster_name = data.terraform_remote_state.eks_playground.outputs.eks_cluster_name
+  })
 
   tags = {
-    Name = "${data.terraform_remote_state.eks_playground.outputs.project_name}-lb-controller-policy"
+    Name = "${data.terraform_remote_state.eks_playground.outputs.eks_project_name}-lb-controller-policy"
   }
 }
 
 # IAM role
 resource "aws_iam_role" "lb_controller" {
-  name = data.terraform_remote_state.eks_playground.outputs.project_name + "-lb-controller-role"
+  name = "${data.terraform_remote_state.eks_playground.outputs.eks_project_name}-lb-controller-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -40,7 +42,7 @@ resource "aws_iam_role" "lb_controller" {
   })
 
   tags = {
-    Name = "${data.terraform_remote_state.eks_playground.outputs.project_name}-lb-controller-role"
+    Name = "${data.terraform_remote_state.eks_playground.outputs.eks_project_name}-lb-controller-role"
   }
 }
 
@@ -58,13 +60,34 @@ resource "helm_release" "aws_load_balancer_controller" {
   namespace = "kube-system"
   version   = "3.2.1"
 
-  set = {
-    "clusterName"       = data.terraform_remote_state.eks_playground.outputs.cluster_name
-    "vpcId"             = data.terraform_remote_state.infrastructure.outputs.vpc_id
-    "region"            = local.region
-    "serviceAccount.create" = "true"
-    "serviceAccount.name"   = "aws-load-balancer-controller"
-    "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn" = aws_iam_role.lb_controller.arn
+  set {
+    name  = "clusterName"
+    value = data.terraform_remote_state.eks_playground.outputs.eks_cluster_name
+  }
+
+  set {
+    name  = "vpcId"
+    value = data.terraform_remote_state.infrastructure.outputs.vpc_id
+  }
+
+  set {
+    name  = "region"
+    value = local.region
+  }
+
+  set {
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.lb_controller.arn
   }
 
   wait = true

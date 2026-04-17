@@ -47,11 +47,11 @@ output "eks_node_group_tags" {
 }
 
 output "eks_oidc_provider_url" {
-  value = aws_iam_openid_connect_provider.cluster.url
+  value = aws_iam_openid_connect_provider.eks_oidc_provider.url
 }
 
 output "eks_oidc_provider_arn" {
-  value = aws_iam_openid_connect_provider.cluster.arn
+  value = aws_iam_openid_connect_provider.eks_oidc_provider.arn
 }
 
 # output "eks_node_group_launch_template_id" {

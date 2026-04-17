@@ -111,7 +111,7 @@ resource "aws_subnet" "private_subnets" {
 
   tags = {
     Name = "PrivateSubnet-${local.azs[count.index]}"
-    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/role/internal-elb" = "1"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
   }
 }
