@@ -1,0 +1,45 @@
+################################################################################
+# Ingress — Echo Service
+#
+# Routes: ALB path /echo → echo Service
+#
+# Same group.name as the website Ingress → they SHARE one ALB.
+# The ALB will have two rules:
+#   Rule 1 (priority 100): IF path = /echo/* THEN forward to echo target group
+#   Rule 2 (priority 200): IF path = /*     THEN forward to website target group
+#
+# group.order controls which rule gets evaluated first.
+# Lower number = higher priority = checked first.
+# The echo rule (100) must be checked BEFORE the website catch-all (200),
+# otherwise / would match everything including /echo requests.
+#
+# This is the same concept as ALB listener rule priorities in the AWS console.
+################################################################################
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echo
+  namespace: default
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: eks-playground-lbc
+    alb.ingress.kubernetes.io/group.order: "100"
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/tags: Project=eks-playground,Environment=dev
+  labels:
+    app: echo
+spec:
+  ingressClassName: alb
+  rules:
+    - host: echo.eks-playground.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: echo
+                port:
+                  number: 80

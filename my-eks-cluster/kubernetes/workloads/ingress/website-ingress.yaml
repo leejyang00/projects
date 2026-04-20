@@ -1,0 +1,41 @@
+################################################################################
+# Ingress — Website
+#
+# Routes: ALB path / → website Service
+#
+# Key annotation: group.name = "eks-playground"
+# This means this Ingress SHARES an ALB with any other Ingress
+# that has the same group name. Without it, each Ingress creates
+# its own ALB (~$0.60/day each).
+#
+# In the ALB, this becomes a listener rule:
+#   IF path = /* THEN forward to website target group
+################################################################################
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: website
+  namespace: default
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: eks-playground-lbc
+    alb.ingress.kubernetes.io/group.order: "200"
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/tags: Project=eks-playground,Environment=dev
+  labels:
+    app: website
+spec:
+  ingressClassName: alb
+  rules:
+    - host: www.eks-playground.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: website
+                port:
+                  number: 80

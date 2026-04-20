@@ -111,6 +111,16 @@
             "Effect": "Allow",
             "Action": [
                 "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:DeleteSecurityGroup",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupEgress"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AuthorizeSecurityGroupIngress",
                 "ec2:RevokeSecurityGroupIngress",
                 "ec2:DeleteSecurityGroup"
             ],
@@ -118,7 +128,7 @@
             "Condition": {
                 "Null": {
                     "aws:ResourceTag/elbv2.k8s.aws/cluster": "false",
-                    "aws:ResourceTag/kubernetes.io/cluster/eks-playground-cluster": "false"
+                    "aws:ResourceTag/kubernetes.io/cluster/${cluster_name}": "false" // why does this not work? --- IGNORE ---
                 }
             }
         },

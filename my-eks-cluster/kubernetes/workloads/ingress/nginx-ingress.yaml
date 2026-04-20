@@ -24,9 +24,10 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - http:
+  - host: nginx.eks-playground.com
+    http:
       paths:
-      - path: /
+      - path: /nginx
         pathType: Prefix
         backend:
           service:
