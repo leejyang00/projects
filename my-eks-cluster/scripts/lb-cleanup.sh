@@ -16,8 +16,10 @@ set -euo pipefail
 # ---------- defaults ----------
 TAG_KEY="Project"
 TAG_VALUE="eks-playground"
+CLUSTER_NAME="eks-playground-cluster"
 NAMESPACE="default"
 WAIT_SECONDS=60
+DELETE_TIMEOUT=30
 DRY_RUN=false
 
 # ---------- parse flags ----------
@@ -80,9 +82,13 @@ delete_ingresses() {
     return
   fi
 
-  echo "$ingresses" | while read -r name; do
-    info "Deleting Ingress: $name"
-    run_or_dry "kubectl delete ingress '$name' -n '$NAMESPACE'"
+  for name in $ingresses; do
+    info "Deleting Ingress: $name (timeout: ${DELETE_TIMEOUT}s) ..."
+    if ! run_or_dry "kubectl delete ingress '$name' -n '$NAMESPACE' --timeout=${DELETE_TIMEOUT}s" 2>/dev/null; then
+      warn "Delete timed out for '$name' — removing finalizers ..."
+      run_or_dry "kubectl patch ingress '$name' -n '$NAMESPACE' -p '{\"metadata\":{\"finalizers\":[]}}' --type=merge"
+      run_or_dry "kubectl delete ingress '$name' -n '$NAMESPACE' --timeout=${DELETE_TIMEOUT}s"
+    fi
   done
 
   ok "All ALB Ingress resources deleted from namespace '$NAMESPACE'."
@@ -170,12 +176,22 @@ cleanup_target_groups() {
 
 # ---------- step 5: find and delete orphaned security groups ----------
 cleanup_security_groups() {
-  info "Searching for security groups tagged ${TAG_KEY}=${TAG_VALUE} ..."
+  info "Searching for security groups tagged ${TAG_KEY}=${TAG_VALUE} or elbv2.k8s.aws/cluster=${CLUSTER_NAME} ..."
 
+  # Search by project tag AND by LB controller cluster tag (for backend SGs the controller creates without project tags)
   local sg_ids
   sg_ids=$(aws ec2 describe-security-groups \
     --filters "Name=tag:${TAG_KEY},Values=${TAG_VALUE}" \
     --query 'SecurityGroups[].GroupId' --output text)
+
+  local sg_ids_lbc
+  sg_ids_lbc=$(aws ec2 describe-security-groups \
+    --filters "Name=tag:elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
+    --query 'SecurityGroups[].GroupId' --output text)
+
+  # Merge and deduplicate
+  sg_ids=$(echo "$sg_ids $sg_ids_lbc" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+  sg_ids=$(echo "$sg_ids" | xargs)  # trim whitespace
 
   if [[ -z "$sg_ids" ]]; then
     info "No tagged security groups found."

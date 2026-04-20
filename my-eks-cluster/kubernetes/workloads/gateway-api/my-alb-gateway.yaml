@@ -1,0 +1,51 @@
+################################################################################
+# Gateway
+#
+# "What should the ALB look like?"
+#
+# This is where ALB configuration lives — no more annotations.
+# One Gateway = One ALB. Compare with Ingress where you used
+# group.name annotations to share an ALB across Ingresses.
+#
+# The Gateway defines:
+#   - Which GatewayClass to use (alb)
+#   - Listeners (port, protocol, hostname filtering)
+#   - Infrastructure config (scheme, subnets, SG — via annotations for now)
+#
+# Note: Some AWS-specific config still uses annotations because
+# the Gateway API spec doesn't cover cloud-specific features like
+# scheme (internet-facing vs internal) or subnet selection.
+# This will improve as the spec matures.
+#
+# Who creates this: Infrastructure/platform team
+# Who references this: App teams (via HTTPRoute.parentRefs)
+################################################################################
+
+apiVersion: gateway.k8s.aws/v1beta1
+kind: LoadBalancerConfiguration
+metadata:
+  name: lb-config-alb
+  namespace: default
+spec:
+  scheme: internet-facing
+
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: my-alb-gateway
+  namespace: default
+spec:
+  gatewayClassName: alb-gatewayclass
+  infrastructure: # 
+    parametersRef:
+      kind: LoadBalancerConfiguration
+      name: lb-config-alb
+      group: gateway.k8s.aws
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same

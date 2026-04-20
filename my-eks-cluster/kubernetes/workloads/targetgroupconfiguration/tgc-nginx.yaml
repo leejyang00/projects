@@ -1,0 +1,10 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: tgc-nginx
+  namespace: default
+spec:
+  targetReference:
+    name: nginx
+  defaultConfiguration:
+    targetType: ip

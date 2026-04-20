@@ -1,0 +1,10 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: tgc-echo
+  namespace: default
+spec:
+  targetReference:
+    name: echo
+  defaultConfiguration:
+    targetType: ip

@@ -27,7 +27,7 @@ spec:
   - host: nginx.eks-playground.com
     http:
       paths:
-      - path: /nginx
+      - path: /
         pathType: Prefix
         backend:
           service:

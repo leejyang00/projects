@@ -1,0 +1,41 @@
+################################################################################
+# Gateway API — Phase 1 & 2
+#
+# Comparison with Ingress (what you're replacing):
+#
+#   INGRESS WORLD                    GATEWAY API WORLD
+#   ─────────────                    ─────────────────
+#   IngressClass "alb"        →      GatewayClass "alb"
+#   (auto-created by Helm)           (we create explicitly)
+#
+#   Annotations on Ingress:   →      Gateway resource:
+#     scheme: internet-facing          listener port/protocol
+#     listen-ports: [HTTP:80]          infrastructure config
+#     group.name: shared-alb          (one Gateway = one ALB)
+#
+#   Ingress rules:            →      HTTPRoute:
+#     host + path + backend           hostnames + rules + backendRefs
+#
+# The shift: ALB config moves from scattered annotations into
+# structured, validated Kubernetes resources. No more JSON-in-strings.
+################################################################################
+
+################################################################################
+# GatewayClass
+#
+# "Which controller handles Gateways of this class?"
+#
+# This is the equivalent of IngressClass. The controller name
+# "gateway.k8s.aws/alb" tells the AWS LB Controller:
+#   "When you see a Gateway referencing this class, create an ALB."
+#
+# In a real org, the platform team creates GatewayClasses.
+# App teams never touch this — they just reference it.
+################################################################################
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: alb-gatewayclass
+spec:
+  controllerName: gateway.k8s.aws/alb
