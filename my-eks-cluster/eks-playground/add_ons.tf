@@ -8,30 +8,40 @@
 # - external-dns: automatically creates Route53 records for Kubernetes services with LoadBalancer/Ingress
 # - metrics-server: collects resource usage metrics for Horizontal Pod Autoscaler and kubectl top
 
-###
-# ran this command to find the latest addon versions compatible with Kubernetes 1.30:
-# aws eks describe-addon-versions \
-#   --kubernetes-version 1.30 \
-#   --query 'addons[*].{Name:addonName, Versions:addonVersions[*].addonVersion}' \
-#   --output table \
-#   --addon-name coredns
-###
+# Resolve the default addon version AWS recommends for the cluster's K8s version.
+# most_recent = false returns the DEFAULT version (safer); set true for newest.
+data "aws_eks_addon_version" "coredns" {
+  addon_name         = "coredns"
+  kubernetes_version = aws_eks_cluster.eks_playground.version
+  most_recent        = false
+}
+
+data "aws_eks_addon_version" "kube_proxy" {
+  addon_name         = "kube-proxy"
+  kubernetes_version = aws_eks_cluster.eks_playground.version
+  most_recent        = false
+}
+
+data "aws_eks_addon_version" "vpc_cni" {
+  addon_name         = "vpc-cni"
+  kubernetes_version = aws_eks_cluster.eks_playground.version
+  most_recent        = false
+}
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name = aws_eks_cluster.eks_playground.name
-  addon_name   = "coredns"
-  addon_version = "v1.11.4-eksbuild.33" # matching cluster version 1.30"
+  cluster_name  = aws_eks_cluster.eks_playground.name
+  addon_name    = "coredns"
+  addon_version = data.aws_eks_addon_version.coredns.version
 
   resolve_conflicts_on_update = "OVERWRITE"
 
-  depends_on = [aws_eks_node_group.eks_playground_node_group] # depends on node group
-
+  depends_on = [aws_eks_node_group.eks_playground_node_group]
 }
 
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name = aws_eks_cluster.eks_playground.name
-  addon_name   = "kube-proxy"
-  addon_version = "v1.30.14-eksbuild.28" # matching cluster version 1.30
+  cluster_name  = aws_eks_cluster.eks_playground.name
+  addon_name    = "kube-proxy"
+  addon_version = data.aws_eks_addon_version.kube_proxy.version
 
   resolve_conflicts_on_update = "OVERWRITE"
 
@@ -39,9 +49,9 @@ resource "aws_eks_addon" "kube_proxy" {
 }
 
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = aws_eks_cluster.eks_playground.name
-  addon_name   = "vpc-cni"
-  addon_version = "v1.21.1-eksbuild.1" # matching cluster version 1.30
+  cluster_name  = aws_eks_cluster.eks_playground.name
+  addon_name    = "vpc-cni"
+  addon_version = data.aws_eks_addon_version.vpc_cni.version
 
   resolve_conflicts_on_update = "OVERWRITE"
 

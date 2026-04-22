@@ -4,7 +4,7 @@
 resource "aws_eks_cluster" "eks_playground" {
     name = local.cluster_name
     role_arn = aws_iam_role.eks_cluster_role.arn
-    version = "1.30"
+    version = "1.35"
 
     vpc_config {
         subnet_ids = concat(

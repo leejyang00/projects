@@ -54,14 +54,14 @@ output "eks_oidc_provider_arn" {
   value = aws_iam_openid_connect_provider.eks_oidc_provider.arn
 }
 
-# output "eks_node_group_launch_template_id" {
-#   value = aws_eks_node_group.eks_playground_node_group.launch_template[0].id
-# }
+output "eks_node_security_group_id" {
+  value = aws_security_group.worker_node.id
+}
 
-# output "eks_node_group_launch_template_version" {
-#   value = aws_eks_node_group.eks_playground_node_group.launch_template[0].version
-# }
+output "eks_node_group_launch_template_id" {
+  value = aws_launch_template.worker_node.id
+}
 
-# output "eks_node_group_launch_template_name" {
-#   value = aws_eks_node_group.eks_playground_node_group.launch_template[0].name
-# }
+output "eks_node_group_launch_template_version" {
+  value = aws_launch_template.worker_node.latest_version
+}
