@@ -30,6 +30,16 @@ spec:
       labels:
         app: nginx
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - nginx
+              topologyKey: "kubernetes.io/zone" # node's label for AZ
       #########################################################################
       # Resource Requests & Limits
       #
@@ -58,11 +68,11 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: 50m       # 0.05 vCPU — nginx barely uses CPU when idle
-              memory: 64Mi   # 64MB — alpine nginx is tiny
+              cpu: 50m # 0.05 vCPU — nginx barely uses CPU when idle
+              memory: 64Mi # 64MB — alpine nginx is tiny
             limits:
-              cpu: 100m      # Throttle at 0.1 vCPU
-              memory: 128Mi  # OOMKill at 128MB
+              cpu: 100m # Throttle at 0.1 vCPU
+              memory: 128Mi # OOMKill at 128MB
 
           ###################################################################
           # Health Probes
@@ -132,5 +142,5 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: http   # References the named port on the container
+      targetPort: http # References the named port on the container
       protocol: TCP

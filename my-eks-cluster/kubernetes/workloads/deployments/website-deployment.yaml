@@ -70,6 +70,16 @@ spec:
       labels:
         app: website
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - website
+              topologyKey: "kubernetes.io/zone" # node's label for AZ
       containers:
         - name: nginx
           image: nginx:1.27-alpine

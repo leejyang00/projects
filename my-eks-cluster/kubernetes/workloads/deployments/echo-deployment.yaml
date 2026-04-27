@@ -26,6 +26,16 @@ spec:
       labels:
         app: echo
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - echo
+              topologyKey: "kubernetes.io/zone" # node's label for AZ
       containers:
         - name: echo
           # ealen/echo-server returns JSON with full request details

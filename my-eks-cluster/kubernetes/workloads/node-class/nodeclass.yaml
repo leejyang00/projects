@@ -1,0 +1,16 @@
+apiVersion: eks.amazonaws.com/v1
+kind: NodeClass
+metadata:
+  name: eks-playground-nodeclass
+spec:
+  # instanceProfile: eks-auto-mode-node-profile
+  role: eks_auto_mode_node_role
+
+  subnetSelectorTerms:
+    - tags:
+        kubernetes.io/role/internal-elb: "1"
+  securityGroupSelectorTerms:
+    - tags:
+        aws:eks:cluster-name: eks-playground-cluster
+  ephemeralStorage:
+    size: "800Gi"

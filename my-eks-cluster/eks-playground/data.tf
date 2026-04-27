@@ -13,3 +13,13 @@ data "terraform_remote_state" "infrastructure" {
     region = "ap-southeast-2"
   }
 }
+
+data "terraform_remote_state" "auto_mode" {
+  backend = "s3"
+
+  config = {
+    bucket = "my-eks-tfstate-319829039858-ap-southeast-2"
+    key    = "auto-mode/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
+}

@@ -1,5 +1,6 @@
 
 destroy
+my-eks-cluster/auto-mode
 my-eks-cluster/load-balancer
 my-eks-cluster/eks-playground
 my-eks-cluster/infrastructure

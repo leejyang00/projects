@@ -424,3 +424,107 @@ else
   echo -e "  ${RED}${BOLD}$FAILURES check(s) failed${NC}"
   exit 1
 fi
+
+################################################################################
+# COMMAND REFERENCE — what this script actually runs
+################################################################################
+#
+# 1) Kubernetes health (test_k8s_health)
+#    For each app in {website, echo, nginx}:
+#      kubectl get pods -l app=<app> --no-headers
+#      kubectl get endpoints <app> -o jsonpath='{.subsets[0].addresses}'
+#
+# 2) Ingress ALB discovery (test_ingress)
+#    kubectl get ingress website -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+#
+# 3) Ingress target group health (check_target_health)
+#    aws elbv2 describe-load-balancers --region ap-southeast-2 \
+#        --query "LoadBalancers[?DNSName=='<alb-dns>'].LoadBalancerArn | [0]"
+#    aws elbv2 describe-target-groups --region ap-southeast-2 \
+#        --load-balancer-arn <alb-arn> --query 'TargetGroups[*].TargetGroupArn'
+#    For each target group:
+#      aws elbv2 describe-target-groups --target-group-arns <tg-arn> \
+#          --query 'TargetGroups[0].TargetGroupName'
+#      aws elbv2 describe-target-health --target-group-arn <tg-arn> \
+#          --query 'TargetHealthDescriptions[?TargetHealth.State==`healthy`] | length(@)'
+#      aws elbv2 describe-target-health --target-group-arn <tg-arn> \
+#          --query 'TargetHealthDescriptions | length(@)'
+#
+# 4) Ingress host-based routing (test_request)
+#    Each request expects HTTP 200 (or 404 for the unknown host):
+#      curl -s -m 10 -w '\n%{http_code} %{time_total}' \
+#           -H 'Host: www.eks-playground.com'    http://<ingress-alb>/   # body must contain "EKS Playground"
+#      curl -s -m 10 -w '\n%{http_code} %{time_total}' \
+#           -H 'Host: echo.eks-playground.com'   http://<ingress-alb>/
+#      curl -s -m 10 -w '\n%{http_code} %{time_total}' \
+#           -H 'Host: nginx.eks-playground.com'  http://<ingress-alb>/
+#      curl -s -m 10 -w '\n%{http_code} %{time_total}' \
+#           -H 'Host: unknown.example.com'       http://<ingress-alb>/   # expect 404
+#
+# 5) Ingress load distribution (test_load_distribution)
+#    Loop 20x:
+#      curl -s -o /dev/null -w '%{http_code}' -m 10 \
+#           -H 'Host: www.eks-playground.com' http://<ingress-alb>/
+#
+# 6) Gateway API status (test_gateway)
+#    kubectl get gatewayclass alb-gatewayclass
+#    kubectl get gateway my-alb-gateway \
+#        -o jsonpath='{.status.conditions[?(@.type=="Accepted")].status}'
+#    kubectl get gateway my-alb-gateway \
+#        -o jsonpath='{.status.conditions[?(@.type=="Programmed")].status}'
+#    kubectl get gateway my-alb-gateway \
+#        -o jsonpath='{.status.addresses[0].value}'
+#    kubectl get httproutes -o jsonpath='{.items[*].metadata.name}'
+#    For each HTTPRoute:
+#      kubectl get httproute <name> \
+#          -o jsonpath='{.status.parents[0].conditions[?(@.type=="Accepted")].status}'
+#
+# 7) Gateway target group health
+#    Extracts the ALB ARN from the Gateway's "Programmed" condition message:
+#      kubectl get gateway my-alb-gateway \
+#          -o jsonpath='{.status.conditions[?(@.type=="Programmed")].message}'
+#    Then runs the same describe-target-groups / describe-target-health
+#    AWS CLI calls as step (3).
+#
+# 8) Gateway host-based routing
+#    Same four curl calls as step (4), but against http://<gateway-alb>/.
+#
+# 9) Gateway load distribution
+#    Same 20x curl loop as step (5), but against http://<gateway-alb>/.
+#
+# 10) Side-by-side comparison (test_comparison, "all" mode only)
+#     For each host in {www, echo, nginx}.eks-playground.com:
+#       curl -s -o /dev/null -w '%{http_code}' -m 10 -H 'Host: <host>' http://<ingress-alb>/
+#       curl -s -o /dev/null -w '%{time_total}' -m 10 -H 'Host: <host>' http://<ingress-alb>/
+#       curl -s -o /dev/null -w '%{http_code}' -m 10 -H 'Host: <host>' http://<gateway-alb>/
+#       curl -s -o /dev/null -w '%{time_total}' -m 10 -H 'Host: <host>' http://<gateway-alb>/
+#
+################################################################################
+# CURL FLAGS REFERENCE
+################################################################################
+#
+#   -s              Silent — suppress progress meter and error messages
+#   -m 10           Max time — timeout after 10 seconds
+#   -o /dev/null    Output — discard the response body
+#   -w '...'        Write-out — print custom info after the request completes
+#   -H 'Host: ...'  Header — set a custom HTTP Host header (for host-based routing)
+#
+# Write-out variables (-w):
+#   %{http_code}    HTTP status code (e.g., 200, 404, 503)
+#   %{time_total}   Total request time in seconds (e.g., 0.142)
+#
+# Patterns used in this script:
+#
+# 1. Get body + code + time (used in test_request)
+#    curl -s -m 10 -w '\n%{http_code} %{time_total}' http://...
+#    → outputs: <body>\n200 0.142
+#
+# 2. Get only http_code, discard body (used in load tests & comparison)
+#    curl -s -o /dev/null -w '%{http_code}' -m 10 http://...
+#    → outputs: 200
+#
+# 3. Get only time, discard body (used in comparison)
+#    curl -s -o /dev/null -w '%{time_total}' -m 10 http://...
+#    → outputs: 0.142
+#
+################################################################################
