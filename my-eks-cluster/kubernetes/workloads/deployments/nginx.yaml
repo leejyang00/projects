@@ -32,14 +32,16 @@ spec:
     spec:
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                      - nginx
-              topologyKey: "kubernetes.io/zone" # node's label for AZ
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - nginx
+                topologyKey: "kubernetes.io/zone" # node's label for AZ
       #########################################################################
       # Resource Requests & Limits
       #

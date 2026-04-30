@@ -16,17 +16,17 @@ data "aws_eks_addon_version" "coredns" {
   most_recent        = false
 }
 
-data "aws_eks_addon_version" "kube_proxy" {
-  addon_name         = "kube-proxy"
-  kubernetes_version = aws_eks_cluster.eks_playground.version
-  most_recent        = false
-}
+# data "aws_eks_addon_version" "kube_proxy" {
+#   addon_name         = "kube-proxy"
+#   kubernetes_version = aws_eks_cluster.eks_playground.version
+#   most_recent        = false
+# }
 
-data "aws_eks_addon_version" "vpc_cni" {
-  addon_name         = "vpc-cni"
-  kubernetes_version = aws_eks_cluster.eks_playground.version
-  most_recent        = false
-}
+# data "aws_eks_addon_version" "vpc_cni" {
+#   addon_name         = "vpc-cni"
+#   kubernetes_version = aws_eks_cluster.eks_playground.version
+#   most_recent        = false
+# }
 
 resource "aws_eks_addon" "coredns" {
   cluster_name  = aws_eks_cluster.eks_playground.name
@@ -35,25 +35,25 @@ resource "aws_eks_addon" "coredns" {
 
   resolve_conflicts_on_update = "OVERWRITE"
 
-  depends_on = [aws_eks_node_group.eks_playground_node_group]
+  # depends_on = [aws_eks_node_group.eks_playground_node_group]
 }
 
-resource "aws_eks_addon" "kube_proxy" {
-  cluster_name  = aws_eks_cluster.eks_playground.name
-  addon_name    = "kube-proxy"
-  addon_version = data.aws_eks_addon_version.kube_proxy.version
+# resource "aws_eks_addon" "kube_proxy" {
+#   cluster_name  = aws_eks_cluster.eks_playground.name
+#   addon_name    = "kube-proxy"
+#   addon_version = data.aws_eks_addon_version.kube_proxy.version
 
-  resolve_conflicts_on_update = "OVERWRITE"
+#   resolve_conflicts_on_update = "OVERWRITE"
 
-  depends_on = [aws_eks_cluster.eks_playground]
-}
+#   depends_on = [aws_eks_cluster.eks_playground]
+# }
 
-resource "aws_eks_addon" "vpc_cni" {
-  cluster_name  = aws_eks_cluster.eks_playground.name
-  addon_name    = "vpc-cni"
-  addon_version = data.aws_eks_addon_version.vpc_cni.version
+# resource "aws_eks_addon" "vpc_cni" {
+#   cluster_name  = aws_eks_cluster.eks_playground.name
+#   addon_name    = "vpc-cni"
+#   addon_version = data.aws_eks_addon_version.vpc_cni.version
 
-  resolve_conflicts_on_update = "OVERWRITE"
+#   resolve_conflicts_on_update = "OVERWRITE"
 
-  depends_on = [aws_eks_cluster.eks_playground]
-}
+#   depends_on = [aws_eks_cluster.eks_playground]
+# }

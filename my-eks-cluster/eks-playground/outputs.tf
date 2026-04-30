@@ -18,33 +18,33 @@ output "eks_cluster_role_arn" {
   value = aws_iam_role.eks_cluster_role.arn
 }
 
-output "eks_node_group_role_arn" {
-  value = aws_iam_role.eks_node_role.arn
-}
+# output "eks_node_group_role_arn" {
+#   value = aws_iam_role.eks_node_role.arn
+# }
 
-output "eks_node_group_name" {
-  value = aws_eks_node_group.eks_playground_node_group.node_group_name
-}
+# output "eks_node_group_name" {
+#   value = aws_eks_node_group.eks_playground_node_group.node_group_name
+# }
 
-output "eks_node_group_instance_types" {
-  value = aws_eks_node_group.eks_playground_node_group.instance_types
-}
+# output "eks_node_group_instance_types" {
+#   value = aws_eks_node_group.eks_playground_node_group.instance_types
+# }
 
-output "eks_node_group_subnet_ids" {
-  value = aws_eks_node_group.eks_playground_node_group.subnet_ids
-}
+# output "eks_node_group_subnet_ids" {
+#   value = aws_eks_node_group.eks_playground_node_group.subnet_ids
+# }
 
-output "eks_node_group_disk_size" {
-  value = aws_eks_node_group.eks_playground_node_group.disk_size
-}
+# output "eks_node_group_disk_size" {
+#   value = aws_eks_node_group.eks_playground_node_group.disk_size
+# }
 
-output "eks_node_group_labels" {
-  value = aws_eks_node_group.eks_playground_node_group.labels
-}
+# output "eks_node_group_labels" {
+#   value = aws_eks_node_group.eks_playground_node_group.labels
+# }
 
-output "eks_node_group_tags" {
-  value = aws_eks_node_group.eks_playground_node_group.tags
-}
+# output "eks_node_group_tags" {
+#   value = aws_eks_node_group.eks_playground_node_group.tags
+# }
 
 output "eks_oidc_provider_url" {
   value = aws_iam_openid_connect_provider.eks_oidc_provider.url
@@ -54,14 +54,14 @@ output "eks_oidc_provider_arn" {
   value = aws_iam_openid_connect_provider.eks_oidc_provider.arn
 }
 
-output "eks_node_security_group_id" {
-  value = aws_security_group.worker_node.id
-}
+# output "eks_node_security_group_id" {
+#   value = aws_security_group.worker_node.id
+# }
 
-output "eks_node_group_launch_template_id" {
-  value = aws_launch_template.worker_node.id
-}
+# output "eks_node_group_launch_template_id" {
+#   value = aws_launch_template.worker_node.id
+# }
 
-output "eks_node_group_launch_template_version" {
-  value = aws_launch_template.worker_node.latest_version
-}
+# output "eks_node_group_launch_template_version" {
+#   value = aws_launch_template.worker_node.latest_version
+# }
