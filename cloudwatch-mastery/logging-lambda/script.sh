@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for i in $(seq 1 20); do
+for i in $(seq 1 30); do
   aws lambda invoke \
   --function-name logging_lambda \
   --payload '{"just_for":"testing"}' \

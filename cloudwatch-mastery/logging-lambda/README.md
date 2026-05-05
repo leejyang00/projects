@@ -94,3 +94,6 @@ filter @type = "REPORT"
         max(init_ms) as max_init
   by bin(1h)
 ```
+
+
+{"timestamp":"2026-05-04T23:22:53.903Z","level":"INFO","requestId":"2d430d6b-...","message":"{\"level\":\"ERROR\",\"endpoint\":\"/api/health\",...}"}

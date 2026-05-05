@@ -61,6 +61,11 @@ resource "aws_lambda_function" "lambda_function" {
     }
   }
 
+  # advance logging configuration
+  logging_config {
+    log_format = "JSON"
+  }
+
   tags = {
     Project = "LGLM"
   }
